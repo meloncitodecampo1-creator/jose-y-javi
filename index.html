@@ -4,23 +4,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pico 4 WebXR - Passthrough & Controllers</title>
-    <meta http-equiv="Content-Security-Policy"
-        content="script-src 'self' 'unsafe-inline' 'unsafe-eval' https://aframe.io https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://aframe.io; connect-src 'self' https://*.loca.lt wss://*.loca.lt https://aframe.io;">
-    <!-- Cargamos A-Frame y componentes de interacción/física -->
+    <title>Pico 4 WebXR - Física Optimizada</title>
+    <!-- A-Frame 1.5.0 -->
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <!-- Extras para locomoción y física base -->
     <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.0.0/dist/aframe-extras.min.js"></script>
+    <!-- Super-hands para el sistema de agarre -->
     <script src="https://unpkg.com/super-hands@^3.0.3/dist/super-hands.min.js"></script>
+    <!-- Motor de física optimizado -->
+    <script
+        src="https://cdn.jsdelivr.net/gh/c-frame/aframe-physics-system@v4.2.2/dist/aframe-physics-system.min.js"></script>
+    <script src="https://unpkg.com/aframe-event-set-component@^4.1.1/dist/aframe-event-set-component.min.js"></script>
 </head>
 
 <body>
-    <!-- 
-        Escena de A-Frame configurada:
-        - xr-mode-ui: Botón para entrar en VR/AR.
-        - renderer="colorManagement: true": Mejores colores.
-        - La propiedad 'background' se controla para el passthrough.
-    -->
     <style>
+        #status {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            color: white;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 8px;
+            border-radius: 4px;
+            font-family: sans-serif;
+            z-index: 2000;
+        }
+
         .custom-ui {
             position: absolute;
             bottom: 20px;
@@ -37,146 +47,142 @@
             color: white;
             border: none;
             border-radius: 8px;
-            font-family: sans-serif;
             font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
         }
 
-        .btn-xr:hover {
-            background: #39a9bf;
+        #debug-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            color: #00FF00;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 16px;
+            z-index: 3000;
+            border: 1px solid #00FF00;
+            pointer-events: none;
+            min-width: 250px;
         }
     </style>
 
+    <div id="status">Cargando Físicas...</div>
+    <div id="debug-panel">Esperando entrada de mandos...</div>
+
     <div class="custom-ui">
-        <button id="vr-btn" class="btn-xr" onclick="enterVR()">Entrar en VR</button>
-        <button id="ar-btn" class="btn-xr" onclick="enterAR()">Entrar en AR (Passthrough)</button>
-        <div id="status"
-            style="position:fixed; top:10px; left:10px; color:white; background:rgba(0,0,0,0.5); padding:5px; font-size:12px; pointer-events:none;">
-            Detectando WebXR...</div>
+        <button class="btn-xr" onclick="document.querySelector('a-scene').enterVR()">Entrar en VR</button>
+        <button class="btn-xr" onclick="enterAR()">Entrar en AR</button>
     </div>
 
-    <a-assets>
-        <!-- Mezcla para objetos agarrables con física -->
-        <!-- Mezcla para objetos agarrables -->
-        <a-mixin id="grabbable" hoverable grabbable stretchable draggable
-            event-set__hoveron="_event: hover-start; material.opacity: 0.7; transparent: true"
-            event-set__hoveroff="_event: hover-end; material.opacity: 1; transparent: false">
-        </a-mixin>
-    </a-assets>
+    <!-- Escena con físicas activadas -->
+    <a-scene xr-mode-ui="enabled: false" renderer="colorManagement: true" physics="debug: false; gravity: -9.8">
 
-    <a-scene xr-mode-ui="enabled: false" renderer="colorManagement: true"
-        device-orientation-permission-ui="enabled: false">
+        <a-assets>
+            <!-- Mixin que combina super-hands con el cuerpo dinámico de físicas -->
+            <a-mixin id="objeto-fisico" hoverable grabbable stretchable draggable
+                dynamic-body="mass: 1; linearDamping: 0.05; angularDamping: 0.05"
+                event-set__hoveron="_event: hover-start; material.opacity: 0.7"
+                event-set__hoveroff="_event: hover-end; material.opacity: 1"
+                event-set__grabstart="_event: grab-start; material.emissive: #7FFF00; material.emissiveIntensity: 0.5"
+                event-set__grabend="_event: grab-end; material.emissive: #000000; material.emissiveIntensity: 0">
+            </a-mixin>
+        </a-assets>
 
-        <a-sky id="background" color="#ffffff" transparent="true"></a-sky>
-
-        <!-- RIG DE CÁMARA PARA MOVIMIENTO (Joystick izquierdo) -->
-        <a-entity id="rig" movement-controls="controls: gamepad, keyboard; speed: 0.1">
+        <!-- RIG DE NAVEGACIÓN -->
+        <a-entity id="rig" movement-controls="controls: gamepad, keyboard; speed: 0.15">
             <a-entity camera position="0 1.6 0" look-controls></a-entity>
 
-            <!-- CONTROLADORES DENTRO DEL RIG -->
-            <a-entity id="leftHand" hand-controls="hand: left; handModelStyle: highPoly; color: #ffcccc"
-                hand-tracking-controls="hand: left" sphere-collider="objects: .raycastable"
-                super-hands="grabStartButtons: trigger, grip; grabEndButtons: trigger, grip" pico-controls>
+            <!-- Mano Izquierda -->
+            <a-entity id="leftHand" hand-controls="hand: left; handModelStyle: highPoly"
+                sphere-collider="objects: .raycastable"
+                super-hands="grabStartButtons: trigger; grabEndButtons: trigger">
+                <a-sphere radius="0.05" visible="false" static-body="shape: sphere; sphereRadius: 0.05"></a-sphere>
             </a-entity>
 
-            <a-entity id="rightHand" hand-controls="hand: right; handModelStyle: highPoly; color: #ffcccc"
-                hand-tracking-controls="hand: right" sphere-collider="objects: .raycastable"
-                super-hands="grabStartButtons: trigger, grip; grabEndButtons: trigger, grip" pico-controls>
+            <!-- Mano Derecha -->
+            <a-entity id="rightHand" hand-controls="hand: right; handModelStyle: highPoly"
+                sphere-collider="objects: .raycastable"
+                super-hands="grabStartButtons: trigger; grabEndButtons: trigger">
+                <a-sphere radius="0.05" visible="false" static-body="shape: sphere; sphereRadius: 0.05"></a-sphere>
             </a-entity>
         </a-entity>
 
-        <!-- HABITACIÓN (PAREDES MARRÓN CLARO) -->
-        <a-entity id="room-visuals">
-            <!-- Suelo -->
-            <a-plane position="0 0 0" rotation="-90 0 0" width="10" height="10" color="#D2B48C"></a-plane>
-            <!-- Paredes (color marrón claro / Tan) -->
-            <a-plane position="0 2.5 -5" width="10" height="5" color="#DEB887"></a-plane> <!-- Frontal -->
-            <a-plane position="0 2.5 5" rotation="0 180 0" width="10" height="5" color="#DEB887"></a-plane>
-            <!-- Trasera -->
-            <a-plane position="-5 2.5 0" rotation="0 90 0" width="10" height="5" color="#DEB887"></a-plane>
-            <!-- Izquierda -->
-            <a-plane position="5 2.5 0" rotation="0 -90 0" width="10" height="5" color="#DEB887"></a-plane>
-            <!-- Derecha -->
-            <!-- Techo -->
-            <a-plane position="0 5 0" rotation="90 0 0" width="10" height="10" color="#F5F5DC"></a-plane>
+        <!-- ENTORNO -->
+        <a-sky id="sky" color="#ffffff"></a-sky>
+
+        <a-entity id="room">
+            <!-- Suelo Físico -->
+            <a-plane static-body position="0 0 0" rotation="-90 0 0" width="10" height="10" color="#D2B48C"></a-plane>
+            <!-- Paredes Físicas -->
+            <a-plane static-body position="0 2.5 -5" width="10" height="5" color="#DEB887"></a-plane>
+            <a-plane static-body position="0 2.5 5" rotation="0 180 0" width="10" height="5" color="#DEB887"></a-plane>
+            <a-plane static-body position="-5 2.5 0" rotation="0 90 0" width="10" height="5" color="#DEB887"></a-plane>
+            <a-plane static-body position="5 2.5 0" rotation="0 -90 0" width="10" height="5" color="#DEB887"></a-plane>
         </a-entity>
 
-        <!-- MESA frente al jugador -->
+        <!-- MESA FÍSICA -->
         <a-entity id="table" position="0 0 -1.5">
-            <!-- Tablero -->
-            <a-box position="0 0.75 0" width="1.5" height="0.1" depth="0.8" color="#8B4513"></a-box>
-            <!-- Patas -->
+            <!-- Tablero Sólido -->
+            <a-box static-body position="0 0.75 0" width="1.5" height="0.1" depth="0.8" color="#8B4513"></a-box>
+            <!-- Cuatro Patas -->
             <a-box position="-0.6 0.35 -0.3" width="0.1" height="0.7" depth="0.1" color="#5D2E0A"></a-box>
             <a-box position="0.6 0.35 -0.3" width="0.1" height="0.7" depth="0.1" color="#5D2E0A"></a-box>
             <a-box position="-0.6 0.35 0.3" width="0.1" height="0.7" depth="0.1" color="#5D2E0A"></a-box>
             <a-box position="0.6 0.35 0.3" width="0.1" height="0.7" depth="0.1" color="#5D2E0A"></a-box>
-
-            <!-- OBJETOS sobre la mesa -->
-            <a-sphere mixin="grabbable" position="-0.4 1.2 0" radius="0.1" color="#EF2D5E" shadow
-                class="raycastable"></a-sphere>
-            <a-box mixin="grabbable" position="0 1.2 0" width="0.15" height="0.15" depth="0.15" color="#4CC3D9" shadow
-                class="raycastable"></a-box>
-            <a-cylinder mixin="grabbable" position="0.4 1.2 0" radius="0.08" height="0.2" color="#FFC65D" shadow
-                class="raycastable"></a-cylinder>
         </a-entity>
+
+        <!-- OBJETOS CON GRAVEDAD -->
+        <a-sphere class="raycastable" mixin="objeto-fisico" position="-0.4 1.5 -1.5" radius="0.1"
+            color="#EF2D5E"></a-sphere>
+        <a-box class="raycastable" mixin="objeto-fisico" position="0 1.5 -1.5" width="0.15" height="0.15" depth="0.15"
+            color="#4CC3D9"></a-box>
+        <a-cylinder class="raycastable" mixin="objeto-fisico" position="0.4 1.5 -1.5" radius="0.08" height="0.2"
+            color="#FFC65D"></a-cylinder>
+
+        <a-light type="ambient" color="#BBB"></a-light>
+        <a-light type="directional" color="#FFF" intensity="0.6" position="-1 1 1"></a-light>
 
     </a-scene>
 
     <script>
         const sceneEl = document.querySelector('a-scene');
-        const skyEl = document.querySelector('#background');
-        const roomEl = document.querySelector('#room-visuals');
-        const tableEl = document.querySelector('#table');
         const statusEl = document.querySelector('#status');
+        const debugPanel = document.querySelector('#debug-panel');
 
-        // Verificar si el contexto es seguro y si WebXR está disponible
-        window.addEventListener('load', () => {
-            if (!window.isSecureContext) {
-                statusEl.innerHTML = "⚠️ ERROR: Contexto NO seguro (HTTPS necesario)";
-                statusEl.style.background = "red";
-            } else if (!navigator.xr) {
-                statusEl.innerHTML = "⚠️ ERROR: WebXR no detectado en este navegador";
-                statusEl.style.background = "red";
-            } else {
-                statusEl.innerHTML = "✅ WebXR Listo (HTTPS activo)";
-                statusEl.style.background = "green";
-            }
+        sceneEl.addEventListener('loaded', () => {
+            statusEl.innerHTML = "✅ Físicas Online";
+            statusEl.style.background = "green";
         });
 
-        function enterVR() {
-            console.log("Intentando entrar en VR...");
-            sceneEl.enterVR();
+        // DEBUGGER DE BOTONES
+        function updateDebug(hand, button, state) {
+            debugPanel.innerHTML = `[DEBUGER]<br>Mano: ${hand}<br>Botón: ${button}<br>Estado: ${state}`;
+            console.log(`[DEBUG] ${hand} | ${button} | ${state}`);
         }
+
+        // Configurar escuchadores para ambos mandos
+        ['leftHand', 'rightHand'].forEach(id => {
+            const handEl = document.getElementById(id);
+
+            // Gatillo (Trigger) - El botón para AGARRAR
+            handEl.addEventListener('triggerdown', () => updateDebug(id, 'GATILLO (Trigger)', 'PULSADO (Agarrando)'));
+            handEl.addEventListener('triggerup', () => updateDebug(id, 'GATILLO (Trigger)', 'SUELTO (Lanzando)'));
+
+            // Botón lateral (Grip)
+            handEl.addEventListener('gripdown', () => updateDebug(id, 'GRIP (Lateral)', 'PULSADO'));
+            handEl.addEventListener('gripup', () => updateDebug(id, 'GRIP (Lateral)', 'SUELTO'));
+
+            // Botones A/B o X/Y
+            handEl.addEventListener('abuttondown', () => updateDebug(id, 'Botón A/X', 'PULSADO'));
+            handEl.addEventListener('bbuttondown', () => updateDebug(id, 'Botón B/Y', 'PULSADO'));
+        });
 
         function enterAR() {
-            console.log("Intentando entrar en AR...");
-            // Corregido: xr-mode-ui es el atributo correcto, no vr-mode-ui
             sceneEl.setAttribute('xr-mode-ui', 'enterAREnabled: true');
-            sceneEl.enterVR(); // A-Frame 1.5.0 detecta automáticamente si el dispositivo prefiere AR tras el setAttribute
+            sceneEl.enterVR();
         }
-
-        sceneEl.addEventListener('enter-vr', function () {
-            statusEl.style.display = 'none';
-            if (sceneEl.is('ar-mode')) {
-                skyEl.setAttribute('visible', 'false');
-                roomEl.setAttribute('visible', 'false');
-                tableEl.setAttribute('visible', 'false');
-                console.log("Modo AR activado");
-            } else {
-                skyEl.setAttribute('visible', 'true');
-                roomEl.setAttribute('visible', 'true');
-                tableEl.setAttribute('visible', 'true');
-                console.log("Modo VR activado");
-            }
-        });
-
-        sceneEl.addEventListener('exit-vr', function () {
-            statusEl.style.display = 'block';
-            skyEl.setAttribute('visible', 'true');
-            roomEl.setAttribute('visible', 'true');
-            tableEl.setAttribute('visible', 'true');
-        });
     </script>
 </body>
 

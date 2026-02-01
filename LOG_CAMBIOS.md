@@ -208,7 +208,104 @@ Como el servidor es `http` (no seguro), debes habilitar la excepción en las Pic
 
 ---
 
+## 📅 2026-02-01 | Sesión: Limpieza Profunda y Restauración de Carga
+
+### 👤 Usuario Git: `javibelloso`
+
+#### 💬 Resumen
+- **Problema**: El navegador de las Pico 4 se quedaba bloqueado en "puntos de carga" infinitos al usar HTTPS local o túneles.
+- **Acción**: 
+    *   **Reescritura Total**: Se ha reescrito el `index.html` desde cero eliminando cualquier código redundante o pesado.
+    *   **Eliminación de CSP**: Se ha retirado la etiqueta de seguridad CSP que podía estar causando bloqueos en el navegador de las gafas.
+    *   **Optimización de Librerías**: Se han mantenido solo las versiones más estables de A-Frame y Super-Hands.
+    *   **Físicas en Pausa**: Se ha desactivado temporalmente el motor de físicas Cannon.js por ser el sospechoso principal de los cuelgues en el procesador de las Pico 4.
+
+---
+
+## 🚀 Dirección de Acceso Recomendada
+**`https://192.168.18.22:5500`**
+*   **Nota**: Refresca la caché del navegador de las gafas si el problema persiste.
+
+---
+
+## 📅 2026-02-01 | Sesión: Activación Final de Físicas y Colisiones
+
+### 👤 Usuario Git: `javibelloso`
+
+#### 💬 Resumen
+- **Problema**: Tras la limpieza de código, los objetos y manos habían perdido sus propiedades físicas (gravedad, colisión y agarre avanzado).
+- **Acción**: 
+    *   **Reactivación de Motor**: Se ha vuelto a integrar `aframe-physics-system`.
+    *   **Configuración de Manos**: Se han añadido cuerpos estáticos (`static-body`) a las manos para que puedan interactuar físicamente con los objetos.
+    *   **Física en Objetos**: Se ha aplicado el mixin `objeto-fisico` con `dynamic-body` a la esfera, el cubo y el cilindro.
+    *   **Suelo y Mesa Sólidos**: Se ha verificado que tanto el suelo como el tablero de la mesa tengan `static-body` para que los objetos no los atraviesen al caer.
+
+---
+
+## 🚀 Dirección de Acceso
+**`https://192.168.18.22:5500`**
+
+---
+
+## 📅 2026-02-01 | Sesión: Refinamiento de Mesa y Controles de Gatillo
+
+### 👤 Usuario Git: `javibelloso`
+
+#### 💬 Resumen
+- **Solicitud**: Añadir las cuatro patas a la mesa y configurar el gatillo (trigger) como único botón de agarre y lanzamiento.
+- **Acción**: 
+    *   **Carpintería Virtual**: Se han añadido las dos patas faltantes a la mesa para completar un total de cuatro.
+    *   **Mapeo de Controles**: Se ha configurado `super-hands` para que el agarre se active exclusivamente con el **gatillo (trigger)**.
+    *   **Física de Lanzamiento**: Al soltar el gatillo mientras se realiza un movimiento, el sistema transfiere de forma natural la inercia al objeto, permitiendo lanzamientos realistas.
+
+---
+
+## 🚀 Dirección de Acceso
+**`https://192.168.18.22:5500`**
+
+---
+
+## 📅 2026-02-01 | Sesión: Feedback Visual de Agarre (Brillo Verde)
+
+### 👤 Usuario Git: `javibelloso`
+
+#### 💬 Resumen
+- **Solicitud**: Hacer que el objeto cambie de color cuando está agarrado para saber que la interacción funciona.
+- **Acción**: 
+    *   **Brillo de Agarre**: Se ha configurado un sistema de **emisión de luz (brillo verde)** que se activa solo cuando el objeto está agarrado por la mano.
+    *   **Mantenimiento de Color**: El objeto mantiene su color original (rojo, azul o amarillo) pero emite un resplandor verde lima cuando el gatillo lo sujeta con éxito.
+    *   **Refuerzo de Colisiones**: Se han añadido esferas de colisión invisibles a las manos para asegurar que el contacto con los objetos sea más preciso y consistente.
+
+---
+
+## 🚀 Dirección de Acceso
+**`https://192.168.18.22:5500`**
+
+---
+
+## 📅 2026-02-01 | Sesión: Sistema de Depuración de Mandos (Debugger)
+
+### 👤 Usuario Git: `javibelloso`
+
+#### 💬 Resumen
+- **Solicitud**: Identificar qué botón se usa para agarrar y mostrar un debugger en pantalla que indique qué botones se están pulsando.
+- **Acción**: 
+    *   **Panel de Depuración**: Se ha creado un panel flotante en la esquina inferior derecha que muestra en tiempo real la mano y el botón detectado.
+    *   **Identificación del Gatillo**: Se ha confirmado que el botón de agarre es el **Gatillo (Trigger)**, el botón trasero del mando.
+    *   **Eventos de Mando**: Se han programado "escuchadores" para:
+        *   Gatillo (Trigger)
+        *   Botón lateral (Grip)
+        *   Botones frontales (A/B y X/Y)
+    *   **Feedback de Estado**: El debugger indica explícitamente cuando el gatillo está en estado "Agarrando" o "Lanzando".
+
+---
+
+## 🚀 Dirección de Acceso
+**`https://192.168.18.22:5500`**
+
+---
+
 ## 📈 Próximos Pasos Sugeridos
-- [ ] Implementar un sistema de sonido espacial.
-- [ ] Añadir más objetos interactuables con texturas.
-- [ ] Optimizar el rendimiento de la habitación marrón.
+- [ ] Mostrar el nivel de presión del gatillo si el hardware lo permite.
+- [ ] Añadir una representación visual del mando en el aire con los botones resaltados.
+- [ ] Implementar un historial de los últimos 5 botones pulsados.
