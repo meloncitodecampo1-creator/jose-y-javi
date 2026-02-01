@@ -133,7 +133,82 @@ Como el servidor es `http` (no seguro), debes habilitar la excepción en las Pic
 
 ---
 
+## 📅 2026-02-01 | Sesión: Física e Interacción de Objetos
+
+### 👤 Usuario Git: `javibelloso`
+
+#### 💬 Resumen
+- **Solicitud**: Crear una mesa con objetos que el jugador pueda agarrar con las manos.
+- **Acción**: 
+    *   Se integraron las librerías `aframe-extras` y `super-hands` para habilitar colisiones y físicas.
+    *   Se diseñó una **mesa** con materiales de madera (visual).
+    *   Se crearon tres objetos interactuables: una **esfera roja**, un **cubo azul** y un **cilindro amarillo**.
+    *   Se configuraron los controladores con `sphere-collider` y `super-hands` para permitir el agarre (squeeze/grab).
+
+---
+
+## 📅 2026-02-01 | Sesión: Locomoción y Diseño de Habitación
+
+### 👤 Usuario Git: `javibelloso`
+
+#### 💬 Resumen
+- **Solicitud**: Permitir el movimiento por la escena usando el joystick izquierdo y crear una habitación con paredes color marrón claro.
+- **Acción**: 
+    *   Se implementó un **rig de cámara** con el componente `movement-controls`.
+    *   Se configuró el **joystick izquierdo** del mando Pico para permitir el movimiento suave.
+    *   Se diseñó una habitación con **paredes color Tan (#DEB887)** y suelo marrón claro.
+    *   Se ajustó la lógica de visibilidad para que tanto la mesa como las nuevas paredes se oculten al entrar en modo AR (Passthrough).
+
+---
+
+## 📅 2026-02-01 | Sesión: Física Aplicada y Lanzamientos
+
+### 👤 Usuario Git: `javibelloso`
+
+#### 💬 Resumen
+- **Solicitud**: Añadir gravedad a los objetos y la mesa, permitir golpearlos y lanzarlos al soltar el gatillo.
+- **Acción**: 
+    *   Se implementó el sistema de físicas **Cannon.js**.
+    *   Se activó `dynamic-body` en la esfera, cubo y cilindro, permitiendo que caigan y rueden.
+    *   Se configuró el suelo, paredes y mesa como `static-body` para servir de obstáculos físicos.
+    *   Se añadieron colisiones físicas a las manos para poder **golpear** los objetos.
+    *   Se configuró el lanzamiento con inercia: al soltar el gatillo mientras se mueve la mano, el objeto sale disparado con la velocidad del movimiento.
+
+---
+
+## 📅 2026-02-01 | Sesión: Resolución de Errores de Seguridad (CSP)
+
+### 👤 Usuario Git: `javibelloso`
+
+#### 💬 Resumen
+- **Problema**: El navegador de las Pico 4 bloqueaba la ejecución de scripts debido a políticas de seguridad (CSP), impidiendo que la escena pasara de los "puntos de carga".
+- **Acción**: 
+    *   Se implementó una etiqueta `<meta>` de **Content-Security-Policy** específica.
+    *   Se concedieron permisos para `'unsafe-eval'` y `'unsafe-inline'`, necesarios para que A-Frame y sus componentes de interacción funcionen correctamente.
+    *   Se autorizaron los dominios de confianza para scripts y conexiones de red.
+
+---
+
+## 📅 2026-02-01 | Sesión: Certificado HTTPS Local (mkcert)
+
+### 👤 Usuario Git: `javibelloso`
+
+#### 💬 Resumen
+- **Problema**: Los túneles públicos (localtunnel) daban problemas de CSP y carga lenta.
+- **Acción**: 
+    *   Se instaló **mkcert** y se generó un certificado SSL local para la IP del PC.
+    *   Se inició un servidor HTTPS local seguro en el puerto 5500.
+    *   Esto permite una conexión directa, rápida y segura entre las Pico 4 y el PC.
+
+---
+
+## 🚀 Direcciones de Acceso (Pico Browser)
+
+1.  **Seguro Local (HTTPS)**: `https://192.168.18.22:5500`
+
+---
+
 ## 📈 Próximos Pasos Sugeridos
-- [ ] Implementar la capacidad de "agarrar" la caja con las manos.
-- [ ] Cambiar el color de las manos dinámicamente.
-- [ ] Añadir sonidos al interactuar.
+- [ ] Implementar un sistema de sonido espacial.
+- [ ] Añadir más objetos interactuables con texturas.
+- [ ] Optimizar el rendimiento de la habitación marrón.
