@@ -1,0 +1,31 @@
+PAPA inicio hoy dia 01/02/2026
+".
+quremos hacer una aplicacion para las pico 4 gafas de realidad virtual . Y queremos usar las herramientas de WEBXR. Te voy a dar unas instrucciones sensillas, apra que tengas contexto. Y luego quiero que me hagas un listado de planificacion, con las cosas que tengo que instalar para poder trabajar en este IDE. Y luego para poder crear una primera app de ejemplo teniendo el suo de la camara de las gafas y que se vean las manos de los controles de la pico 4. Y una escena de una habitacion vacia en blanco con una caja en el centro.
+Esta son las instrucciones:
+🔹 4. WebXR (HTML + JS)
+
+¿IDE? 👉 VS Code
+
+Qué puedes hacer:
+
+Experiencias VR ligeras
+
+Visualizadores
+
+Demos rápidas
+
+Frameworks:
+
+A-Frame
+
+Three.js
+
+Babylon.js
+
+Limitaciones:
+
+Rendimiento inferior
+
+Acceso limitado a hardware
+.!
+----------------------------------------------
