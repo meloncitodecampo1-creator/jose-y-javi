@@ -55,7 +55,48 @@ Este documento recopila la evolución del proyecto, los pasos técnicos dados y 
 
 ---
 
+## 📅 2026-02-01 | Sesión: Resolución de Problemas de WebXR e HTTPS
+
+### 👤 Usuario Git: `javibelloso`
+
+#### 💬 Resumen
+- **Problema**: El modo VR/AR no se activaba al pulsar los botones en las Pico 4.
+- **Causa**: WebXR requiere un "Secure Context" (HTTPS) para funcionar en redes locales.
+- **Acción**: 
+    *   Se identificó la necesidad de configurar `chrome://flags` en las gafas o usar un túnel HTTPS (ngrok).
+    *   Se prepararon instrucciones de portabilidad para replicar el entorno en otros equipos.
+
+---
+
+## 🚀 Instrucciones para Ejecución en Otro Equipo
+
+Para que este proyecto funcione en un nuevo ordenador y sea visible en las Pico 4, sigue estos pasos:
+
+### 1. Requisitos Previos
+*   Instalar **Node.js** (incluye `npm`).
+*   Tener el código del proyecto en una carpeta.
+
+### 2. Lanzar el Servidor
+En una terminal dentro de la carpeta del proyecto, ejecuta:
+```bash
+npx http-server -p 5500 -a 0.0.0.0
+```
+*(Si hay errores de permisos en Windows, usa el script de Node.js rápido que creamos en la sesión anterior).*
+
+### 3. Configuración de Red e IP
+1.  Averigua la IP local del nuevo PC (ej: `ipconfig` en Windows).
+2.  Asegúrate de que las Pico 4 estén en la misma red Wi-Fi.
+
+### 4. Habilitar WebXR (Crucial)
+Como el servidor es `http` (no seguro), debes habilitar la excepción en las Pico 4:
+1.  En el navegador de las gafas, entra en: `chrome://flags`.
+2.  Busca **"Insecure origins treated as secure"**.
+3.  Añade la dirección del PC: `http://[IP-DEL-PC]:5500`.
+4.  Cambia a **"Enabled"** y reinicia el navegador.
+
+---
+
 ## 📈 Próximos Pasos Sugeridos
 - [ ] Implementar interacción con la caja (cambio de color al apuntar).
 - [ ] Añadir soporte para "Hands" (seguimiento de manos sin mandos).
-- [ ] Probar el despliegue en un entorno HTTPS (necesario para algunas funciones de WebXR).
+- [ ] Configurar un servidor con certificado SSL local para evitar el paso de `chrome://flags`.
