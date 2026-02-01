@@ -5,8 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pico 4 WebXR - Passthrough & Controllers</title>
-    <!-- Cargamos A-Frame -->
+    <!-- Cargamos A-Frame y componentes de interacción -->
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.0.0/dist/aframe-extras.min.js"></script>
+    <script src="https://unpkg.com/super-hands@^3.0.3/dist/super-hands.min.js"></script>
 </head>
 
 <body>
@@ -45,20 +47,44 @@
     </style>
 
     <div class="custom-ui">
-        <button class="btn-xr" onclick="enterVR()">Entrar en VR</button>
-        <button class="btn-xr" onclick="enterAR()">Entrar en AR (Passthrough)</button>
+        <button id="vr-btn" class="btn-xr" onclick="enterVR()">Entrar en VR</button>
+        <button id="ar-btn" class="btn-xr" onclick="enterAR()">Entrar en AR (Passthrough)</button>
+        <div id="status"
+            style="position:fixed; top:10px; left:10px; color:white; background:rgba(0,0,0,0.5); padding:5px; font-size:12px; pointer-events:none;">
+            Detectando WebXR...</div>
     </div>
 
     <a-scene xr-mode-ui="enabled: false" renderer="colorManagement: true"
         device-orientation-permission-ui="enabled: false">
 
-        <a-assets></a-assets>
+        <a-assets>
+            <!-- Mezcla para objetos agarrables -->
+            <a-mixin id="grabbable" hoverable grabbable stretchable draggable
+                event-set__hoveron="_event: hover-start; material.opacity: 0.7; transparent: true"
+                event-set__hoveroff="_event: hover-end; material.opacity: 1; transparent: false">
+            </a-mixin>
+        </a-assets>
 
         <a-sky id="background" color="#ffffff" transparent="true"></a-sky>
 
-        <a-box position="0 1.5 -2" rotation="0 45 0" color="#4CC3D9" shadow
-            animation="property: rotation; to: 0 405 0; loop: true; dur: 10000">
-        </a-box>
+        <!-- MESA frente al jugador -->
+        <a-entity id="table" position="0 0 -1">
+            <!-- Tablero -->
+            <a-box position="0 0.75 0" width="1.5" height="0.1" depth="0.8" color="#8B4513"></a-box>
+            <!-- Patas -->
+            <a-box position="-0.6 0.35 -0.3" width="0.1" height="0.7" depth="0.1" color="#5D2E0A"></a-box>
+            <a-box position="0.6 0.35 -0.3" width="0.1" height="0.7" depth="0.1" color="#5D2E0A"></a-box>
+            <a-box position="-0.6 0.35 0.3" width="0.1" height="0.7" depth="0.1" color="#5D2E0A"></a-box>
+            <a-box position="0.6 0.35 0.3" width="0.1" height="0.7" depth="0.1" color="#5D2E0A"></a-box>
+
+            <!-- OBJETOS sobre la mesa -->
+            <a-sphere mixin="grabbable" position="-0.4 0.9 0" radius="0.1" color="#EF2D5E" shadow
+                class="raycastable"></a-sphere>
+            <a-box mixin="grabbable" position="0 0.9 0" width="0.15" height="0.15" depth="0.15" color="#4CC3D9" shadow
+                class="raycastable"></a-box>
+            <a-cylinder mixin="grabbable" position="0.4 0.9 0" radius="0.08" height="0.2" color="#FFC65D" shadow
+                class="raycastable"></a-cylinder>
+        </a-entity>
 
         <a-entity id="room-visuals">
             <a-plane position="0 0 0" rotation="-90 0 0" width="10" height="10" color="#FFFFFF"></a-plane>
@@ -67,9 +93,14 @@
         <a-light type="ambient" color="#BBB"></a-light>
         <a-light type="directional" color="#FFF" intensity="0.6" position="-1 1 0"></a-light>
 
-        <a-entity id="leftHand" laser-controls="hand: left" raycaster="objects: .raycastable" pico-controls></a-entity>
-        <a-entity id="rightHand" laser-controls="hand: right" raycaster="objects: .raycastable"
-            pico-controls></a-entity>
+        <!-- CONTROLADORES CONFIGURADOS PARA AGARRAR -->
+        <a-entity id="leftHand" hand-controls="hand: left; handModelStyle: highPoly; color: #ffcccc"
+            hand-tracking-controls="hand: left" sphere-collider="objects: .raycastable" super-hands pico-controls>
+        </a-entity>
+
+        <a-entity id="rightHand" hand-controls="hand: right; handModelStyle: highPoly; color: #ffcccc"
+            hand-tracking-controls="hand: right" sphere-collider="objects: .raycastable" super-hands pico-controls>
+        </a-entity>
 
     </a-scene>
 
@@ -77,18 +108,36 @@
         const sceneEl = document.querySelector('a-scene');
         const skyEl = document.querySelector('#background');
         const roomEl = document.querySelector('#room-visuals');
+        const statusEl = document.querySelector('#status');
+
+        // Verificar si el contexto es seguro y si WebXR está disponible
+        window.addEventListener('load', () => {
+            if (!window.isSecureContext) {
+                statusEl.innerHTML = "⚠️ ERROR: Contexto NO seguro (HTTPS necesario)";
+                statusEl.style.background = "red";
+            } else if (!navigator.xr) {
+                statusEl.innerHTML = "⚠️ ERROR: WebXR no detectado en este navegador";
+                statusEl.style.background = "red";
+            } else {
+                statusEl.innerHTML = "✅ WebXR Listo (HTTPS activo)";
+                statusEl.style.background = "green";
+            }
+        });
 
         function enterVR() {
+            console.log("Intentando entrar en VR...");
             sceneEl.enterVR();
         }
 
         function enterAR() {
-            // A-Frame detecta modo AR si el sistema lo soporta
-            sceneEl.setAttribute('vr-mode-ui', 'enterAREnabled: true');
-            sceneEl.enterVR(true); // El parámetro true intenta forzar AR
+            console.log("Intentando entrar en AR...");
+            // Corregido: xr-mode-ui es el atributo correcto, no vr-mode-ui
+            sceneEl.setAttribute('xr-mode-ui', 'enterAREnabled: true');
+            sceneEl.enterVR(); // A-Frame 1.5.0 detecta automáticamente si el dispositivo prefiere AR tras el setAttribute
         }
 
         sceneEl.addEventListener('enter-vr', function () {
+            statusEl.style.display = 'none';
             if (sceneEl.is('ar-mode')) {
                 skyEl.setAttribute('visible', 'false');
                 roomEl.setAttribute('visible', 'false');
@@ -101,6 +150,7 @@
         });
 
         sceneEl.addEventListener('exit-vr', function () {
+            statusEl.style.display = 'block';
             skyEl.setAttribute('visible', 'true');
             roomEl.setAttribute('visible', 'true');
         });

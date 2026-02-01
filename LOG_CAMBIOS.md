@@ -96,7 +96,44 @@ Como el servidor es `http` (no seguro), debes habilitar la excepción en las Pic
 
 ---
 
+## 📅 2026-02-01 | Sesión: Configuración de Entorno Profesionall (Node, Ngrok, HTTPS)
+
+### 👤 Usuario Git: `javibelloso`
+
+#### 💬 Resumen
+- **Solicitud**: Instalar Node.js, Python e implementar seguridad HTTPS para las Pico 4.
+- **Acción**: 
+    *   Se verificó la instalación de **Python 3.14.2**.
+    *   Se instaló **Node.js LTS (v24.13.0)** mediante `winget`.
+    *   Se instaló **Ngrok** mediante `winget`.
+    *   Se inició un servidor local usando Python en el puerto 5500.
+    *   Se configuró un túnel HTTPS (localtunnel/ngrok) para permitir el acceso seguro desde las Pico 4 sin necesidad de modificar flags de seguridad.
+
+---
+
+## 🚀 Direcciones de Acceso (Pico Browser)
+
+1.  **Directo (HTTP)**: `http://192.168.18.22:5500` (Requiere `chrome://flags` si no hay HTTPS).
+2.  **Seguro (HTTPS)**: `https://fast-wombats-see.loca.lt`
+    *   **IMPORTANTE**: Asegúrate de escribir `https://` (con la 's') al principio. Si entras solo con `http://`, las Pico 4 bloquearán el modo VR por seguridad.
+    *   **Password**: `217.29.105.27` (si te la vuelve a pedir).
+
+---
+
+## 📅 2026-02-01 | Sesión: Implementación de Manos y Hand Tracking
+
+### 👤 Usuario Git: `javibelloso`
+
+#### 💬 Resumen
+- **Solicitud**: Mostrar modelos de manos en lugar de solo los rayos de los mandos.
+- **Acción**: 
+    *   Se actualizaron las entidades de control para incluir `hand-controls`.
+    *   Se configuró el estilo `highPoly` para obtener modelos de manos detallados.
+    *   Se añadió soporte para `hand-tracking-controls`, permitiendo que las manos se muevan incluso sin mandos (si las Pico 4 tienen activado el seguimiento de manos).
+
+---
+
 ## 📈 Próximos Pasos Sugeridos
-- [ ] Implementar interacción con la caja (cambio de color al apuntar).
-- [ ] Añadir soporte para "Hands" (seguimiento de manos sin mandos).
-- [ ] Configurar un servidor con certificado SSL local para evitar el paso de `chrome://flags`.
+- [ ] Implementar la capacidad de "agarrar" la caja con las manos.
+- [ ] Cambiar el color de las manos dinámicamente.
+- [ ] Añadir sonidos al interactuar.
