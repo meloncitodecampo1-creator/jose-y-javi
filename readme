@@ -1,0 +1,31 @@
+Readme.txt
+Vamos a hacer pruebas para las pico4 con WEBXR
+🔹 4. WebXR (HTML + JS)
+
+¿IDE? 👉 VS Code
+
+Qué puedes hacer:
+
+Experiencias VR ligeras
+
+Visualizadores
+
+Demos rápidas
+
+Frameworks:
+
+A-Frame
+
+Three.js
+
+Babylon.js
+
+Limitaciones:
+
+Rendimiento inferior
+
+Acceso limitado a hardware
+
+No recomendado para apps grandes
+
+📌 Ideal para prototipos rápidos.
