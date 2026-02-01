@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <!-- Cargamos A-Frame -->
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
 </head>
+
 <body>
     <!-- 
         Escena de A-Frame configurada:
@@ -14,63 +16,87 @@
         - renderer="colorManagement: true": Mejores colores.
         - La propiedad 'background' se controla para el passthrough.
     -->
-    <a-scene 
-        xr-mode-ui="enabled: true" 
-        renderer="colorManagement: true"
+    <style>
+        .custom-ui {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-xr {
+            padding: 12px 24px;
+            background: #4CC3D9;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-family: sans-serif;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-xr:hover {
+            background: #39a9bf;
+        }
+    </style>
+
+    <div class="custom-ui">
+        <button class="btn-xr" onclick="enterVR()">Entrar en VR</button>
+        <button class="btn-xr" onclick="enterAR()">Entrar en AR (Passthrough)</button>
+    </div>
+
+    <a-scene xr-mode-ui="enabled: false" renderer="colorManagement: true"
         device-orientation-permission-ui="enabled: false">
-        
-        <!-- ASSETS: Aquí cargaríamos recursos si hiciese falta -->
+
         <a-assets></a-assets>
 
-        <!-- 
-            SOPORTE DE PASSTHROUGH (AR) 
-            En A-Frame, para ver el passthrough en Pico 4, el fondo debe ser transparente
-            cuando estemos en modo AR.
-        -->
         <a-sky id="background" color="#ffffff" transparent="true"></a-sky>
 
-        <!-- LA CAJA EN EL CENTRO -->
-        <a-box 
-            position="0 1.5 -2" 
-            rotation="0 45 0" 
-            color="#4CC3D9" 
-            shadow
+        <a-box position="0 1.5 -2" rotation="0 45 0" color="#4CC3D9" shadow
             animation="property: rotation; to: 0 405 0; loop: true; dur: 10000">
         </a-box>
 
-        <!-- HABITACIÓN VACÍA (SUELO Y PAREDES BLANCAS) -->
-        <!-- Nota: En modo AR (Passthrough), esto se suele ocultar para ver tu habitación -->
         <a-entity id="room-visuals">
-             <a-plane position="0 0 0" rotation="-90 0 0" width="10" height="10" color="#FFFFFF"></a-plane>
-             <!-- Paredes opcionales si quieres verlas en VR puro -->
-             <!-- <a-box position="0 2.5 -5" width="10" height="5" depth="0.1" color="#EEEEEE"></a-box> -->
+            <a-plane position="0 0 0" rotation="-90 0 0" width="10" height="10" color="#FFFFFF"></a-plane>
         </a-entity>
 
-        <!-- LUCES -->
         <a-light type="ambient" color="#BBB"></a-light>
         <a-light type="directional" color="#FFF" intensity="0.6" position="-1 1 0"></a-light>
 
-        <!-- CONTROLES Y MANOS PARA PICO 4 -->
         <a-entity id="leftHand" laser-controls="hand: left" raycaster="objects: .raycastable" pico-controls></a-entity>
-        <a-entity id="rightHand" laser-controls="hand: right" raycaster="objects: .raycastable" pico-controls></a-entity>
+        <a-entity id="rightHand" laser-controls="hand: right" raycaster="objects: .raycastable"
+            pico-controls></a-entity>
 
     </a-scene>
 
     <script>
-        // Script sencillo para manejar el cambio a AR (Passthrough)
         const sceneEl = document.querySelector('a-scene');
         const skyEl = document.querySelector('#background');
         const roomEl = document.querySelector('#room-visuals');
 
+        function enterVR() {
+            sceneEl.enterVR();
+        }
+
+        function enterAR() {
+            // A-Frame detecta modo AR si el sistema lo soporta
+            sceneEl.setAttribute('vr-mode-ui', 'enterAREnabled: true');
+            sceneEl.enterVR(true); // El parámetro true intenta forzar AR
+        }
+
         sceneEl.addEventListener('enter-vr', function () {
             if (sceneEl.is('ar-mode')) {
-                // Si entramos en AR, ocultamos el fondo blanco y el suelo para ver el passthrough
                 skyEl.setAttribute('visible', 'false');
                 roomEl.setAttribute('visible', 'false');
+                console.log("Modo AR activado");
             } else {
-                // En VR normal mantenemos la habitación blanca
                 skyEl.setAttribute('visible', 'true');
                 roomEl.setAttribute('visible', 'true');
+                console.log("Modo VR activado");
             }
         });
 
@@ -80,4 +106,5 @@
         });
     </script>
 </body>
+
 </html>
