@@ -305,7 +305,17 @@ Como el servidor es `http` (no seguro), debes habilitar la excepción en las Pic
 
 ---
 
+## 📅 2026-02-01 | Sesión: Finalización de Jornada
+
+### 👤 Usuario Git: `javibelloso`
+
+#### 💬 Resumen
+- **Acción**: Cierre de servidores locales y limpieza de procesos de desarrollo (`node` y `python`).
+- **Estado**: Proyecto guardado y listo para la próxima sesión.
+
+---
+
 ## 📈 Próximos Pasos Sugeridos
-- [ ] Mostrar el nivel de presión del gatillo si el hardware lo permite.
-- [ ] Añadir una representación visual del mando en el aire con los botones resaltados.
-- [ ] Implementar un historial de los últimos 5 botones pulsados.
+- [ ] Explorar la adición de texturas de alta resolución.
+- [ ] Implementar un sistema de guardado de la posición de los objetos.
+- [ ] Mejorar la iluminación de la sala.
